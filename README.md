@@ -24,6 +24,8 @@ Production recommendation: select `code,visuals` explicitly. Quality Swarms is e
 
 [Choose modules and understand installation](docs/MODULES.md) · [Read the case study](https://aethirex-ai.github.io/quality-code/) · [Visual baseline and audit](docs/QUALITY_VISUALS.md) · [Technical case study](docs/CASE_STUDY.md)
 
+The [shared foundation](assets/modules/foundation.md) prohibits secret-file access without explicit user authorization for the path/category and operation, including `.env` examples and indirect tool access. Every module selection includes this boundary. It is an agent instruction, not an operating-system access control.
+
 ## The quality contract
 
 | Change risk | Builder evidence | Independent audit |

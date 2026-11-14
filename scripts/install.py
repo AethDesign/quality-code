@@ -109,6 +109,11 @@ def delegation_block(master: Path, modules: list[str] | None = None) -> str:
     fallback = "Fallback while project policy is unavailable: preserve risk lanes, safety, permissions and required independent verification. Do not claim unavailable evidence passed.\n\n"
     if "swarms" in selected:
         fallback = text[text.index("Fallback while project policy is unavailable:"):text.index(DELEGATION_END)]
+    fallback += ("Secret-access boundary: never read or interact with .env variants (including examples), secret/credential/private-key files or stores, "
+                 "or secret/credentials/sensitive/private/scr-labelled project folders without explicit user authorization for the relevant path/category and operation. "
+                 "Exclude indirect searches, scripts, symlinks and helper access too; only minimal avoidance metadata is allowed. "
+                 "Generic build/debug/audit/deploy instructions are not permission. Keep authorized secret values out of output and artifacts; block only dependent work. "
+                 "See the shared foundation for the full boundary.\n\n")
     if "visuals" in selected:
         fallback += ("Quality Visuals: use specific useful content and intentional composition; remove unjustified slogan eyebrows, arrows, numbering and empty containers. "
                      "For new or substantially redesigned frontends, require desktop/mobile evidence and fresh independent visual review; fix blocking baseline findings before completion. "

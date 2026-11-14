@@ -2,6 +2,10 @@
 
 This protocol begins only when the project's risk gate, a selected module's explicit gate, or the user requires an independent audit. A selected Quality Visuals gate covers new frontends/pages and substantial visual redesigns; low-risk isolated copy/static-style work still receives focused builder confirmation unless a stricter rule applies. Do not invoke it merely because a file containing code changed. Once invoked, apply the full protocol; the entry gate limits frequency, not audit completeness.
 
+## Protected evidence
+
+The shared foundation's secret-access boundary applies to audit tools and verification commands too. Audit completeness is not authorization to inspect protected paths. Request specifically scoped user permission when necessary, continue safe scope and mark unavailable required evidence BLOCKED. Do not substitute another tool or helper to bypass the restriction.
+
 ## Independence boundary
 
 Use a fresh audit agent. Give it the repository, acceptance criteria, raw diff scope, and generated audit packet. Do not provide the builder conversation, intended verdict, suspected bugs, or builder conclusions.
