@@ -1,5 +1,7 @@
 # ServiceFlow MVP: completion without stage deadlines
 
+> **Benchmark disclosure.** ServiceFlow is a fictional test app created for this coding-agent benchmark. The benchmark outputs do not reflect the quality of AethDesign’s client projects. The test app is unaffiliated with the real company ServiceFlow.
+
 Both sessions reached **independent local-app PASS** after repairs and full-scope re-audits. Adaptive chose one direct backend helper while the primary continuously owned the frontend and integration. Every primary and auditor used the same native model at high effort; the helper used that same model at medium effort. No cheaper-model implementation or recursive swarm was exercised.
 
 | Observation | Single | Adaptive |

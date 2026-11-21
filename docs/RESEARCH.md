@@ -2,6 +2,8 @@
 
 [Quality Code + Visuals](../README.md) is the adoption path. This index gathers AethDesign’s exploratory comparisons and fictional demo outputs. Each record includes its own methods, evidence and limits.
 
+**ServiceFlow disclosure.** ServiceFlow is a fictional test app created for the MVP and frontend remake benchmarks. The benchmark outputs do not reflect the quality of AethDesign’s client projects. The test app is unaffiliated with the real company ServiceFlow.
+
 ## Visual quality
 
 Quality Visuals gives builders and reviewers a shared starting point. The trials exposed persistent generic layouts and cases where fewer surface markers or a passing audit did not translate into stronger composition. AethDesign has yet to see a satisfactory demonstration of reliable visual improvement. The baseline and review methods need further work.

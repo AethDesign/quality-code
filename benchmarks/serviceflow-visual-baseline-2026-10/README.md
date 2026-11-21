@@ -1,5 +1,7 @@
 # ServiceFlow frontend remake trial
 
+> **Benchmark disclosure.** ServiceFlow is a fictional test app created for this coding-agent benchmark. The benchmark outputs do not reflect the quality of AethDesign’s client projects. The test app is unaffiliated with the real company ServiceFlow.
+
 This is an observational follow-up to the [ServiceFlow MVP experiment](../serviceflow-mvp-2026-10/). It records two frontend remakes of different existing apps. It does not change that experiment's original outputs or scores.
 
 Both corrected apps have passed the prior broad gates and their additional same-reviewer supplemental content re-reviews. Final native-tree accounting is reconciled. Static-gallery publication review remains a separate gate. Earlier FAIL/BLOCKED outcomes, originals and first handoffs stay visible.

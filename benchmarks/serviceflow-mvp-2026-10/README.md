@@ -1,5 +1,7 @@
 # ServiceFlow: an uncapped full-stack MVP comparison
 
+> **Benchmark disclosure.** ServiceFlow is a fictional test app created for this coding-agent benchmark. The benchmark outputs do not reflect the quality of AethDesign’s client projects. The test app is unaffiliated with the real company ServiceFlow.
+
 Two native coding sessions implement the same fictional home-services product from the same blank fixture and acceptance basis. Both use Quality Code. One implements without delegation; the other may choose an adaptive team. This compares those two observed workflows, not Quality Code against its absence.
 
 The product includes customer enquiries, role-protected dashboards, an enforced status workflow and activity history, admin service management, mature authentication, SQLite persistence and editable offline reply drafting. The business is fictional; AethDesign is the software-development and UI/UX design studio conducting this experiment.
