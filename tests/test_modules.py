@@ -66,8 +66,8 @@ class ModuleCompositionTests(unittest.TestCase):
         return text
 
     def test_parse_modules_canonicalizes_and_rejects_invalid_values(self):
-        self.assertEqual(engine.parse_modules("swarms,code,code"), ["code", "swarms"])
-        self.assertEqual(engine.parse_modules("all"), ["code", "visuals", "swarms"])
+        self.assertEqual(engine.parse_modules("visuals,code,code"), ["code", "visuals"])
+        self.assertEqual(engine.parse_modules("all"), ["code", "visuals"])
         for value in ("", ",code", "code,", "all,code", "unknown"):
             with self.subTest(value=value), self.assertRaises(engine.QualityError):
                 engine.parse_modules(value)
@@ -75,7 +75,7 @@ class ModuleCompositionTests(unittest.TestCase):
     def test_compose_single_pair_and_all_in_canonical_order(self):
         module_dir = ROOT / "assets" / "modules"
         foundation = (module_dir / "foundation.md").read_text().strip()
-        for selected in (["code"], ["visuals", "swarms"], ["code", "visuals", "swarms"]):
+        for selected in (["code"], ["visuals"], ["code", "visuals"]):
             with self.subTest(selected=selected):
                 result = engine.compose_instructions(ROOT, selected)
                 self.assertEqual(result.count(engine.MANAGED_START), 1)
@@ -102,19 +102,61 @@ class ModuleCompositionTests(unittest.TestCase):
             engine.compose_instructions(self.root, ["code"])
 
     def test_init_persists_canonical_selection_and_generated_copy(self):
-        self.cli("init", str(self.root), "--modules", "swarms,code,code")
-        self.assertEqual(self.config()["quality_modules"], ["code", "swarms"])
+        self.cli("init", str(self.root), "--modules", "code,code")
+        self.assertEqual(self.config()["quality_modules"], ["code"])
         agents = (self.root / "AGENTS.md").read_text()
         module_dir = ROOT / "assets" / "modules"
         self.assertIn((module_dir / "foundation.md").read_text().strip(), agents)
         self.assertIn((module_dir / "code.md").read_text().strip(), agents)
-        self.assertIn((module_dir / "swarms.md").read_text().strip(), agents)
         self.assertNotIn((module_dir / "visuals.md").read_text().strip(), agents)
         self.assertEqual((self.root / ".quality/quality.py").read_bytes(), SCRIPT.read_bytes())
 
+    def test_public_upgrade_requires_explicit_migration_for_legacy_swarms(self):
+        for configured in (True, False):
+            with self.subTest(configured=configured), tempfile.TemporaryDirectory() as directory:
+                project = Path(directory)
+                self.cli("init", str(project))
+                config = project / ".quality/quality.toml"
+                original = config.read_text()
+                selection = 'quality_modules = ["code", "visuals"]\n'
+                config.write_text(original.replace(selection, 'quality_modules = ["code", "visuals", "swarms"]\n' if configured else ""))
+                agents = project / "AGENTS.md"
+                agents.write_text("Preserve local context.\n\n" + agents.read_text().replace(
+                    engine.MANAGED_END, engine.RETIRED_MODULE_HEADING + "  \n\nLegacy module.\n" + engine.MANAGED_END
+                ))
+                before = [path.read_bytes() for path in (config, agents)]
+                self.cli("upgrade", "--dry-run", str(project), expected=2)
+                self.cli("upgrade", str(project), expected=2)
+                self.cli("upgrade", str(project), "--modules", "all", expected=2)
+                self.assertEqual([path.read_bytes() for path in (config, agents)], before)
+                self.cli("upgrade", "--dry-run", str(project), "--modules", "code,visuals")
+                self.assertEqual([path.read_bytes() for path in (config, agents)], before)
+                self.cli("upgrade", str(project), "--modules", "code,visuals")
+                self.assertEqual(engine.load_config(project)["quality_modules"], ["code", "visuals"])
+                self.assertIn("Preserve local context.", agents.read_text())
+                self.assertNotIn(engine.RETIRED_MODULE_HEADING, agents.read_text())
+                self.assertEqual(engine.load_config(project)["verify"], engine.tomllib.loads(original)["verify"])
+
+    def test_bootstrap_requires_explicit_selection_for_instruction_only_swarms(self):
+        for command in ("init", "adopt"):
+            with self.subTest(command=command), tempfile.TemporaryDirectory() as directory:
+                project = Path(directory)
+                agents = project / "AGENTS.md"
+                original = ("Local guidance.\n\n" + engine.MANAGED_START + "\n"
+                            + engine.RETIRED_MODULE_HEADING + "  \nLegacy module.\n" + engine.MANAGED_END + "\n")
+                agents.write_text(original)
+                self.cli(command, str(project), expected=2)
+                self.cli(command, str(project), "--modules", "all", expected=2)
+                self.assertEqual(list(project.iterdir()), [agents])
+                self.assertEqual(agents.read_text(), original)
+                self.cli(command, str(project), "--modules", "code,visuals")
+                self.assertIn("Local guidance.", agents.read_text())
+                self.assertNotIn(engine.RETIRED_MODULE_HEADING, agents.read_text())
+                self.assertEqual(engine.load_config(project)["quality_modules"], ["code", "visuals"])
+
     def test_invalid_selection_fails_before_creating_project_files(self):
         self.root.rmdir()
-        self.cli("init", str(self.root), "--modules", "code,unknown", expected=2)
+        self.cli("init", str(self.root), "--modules", "code,swarms", expected=2)
         self.assertFalse(self.root.exists())
 
     def test_adopt_explicit_change_requires_upgrade_and_no_flag_keeps_selection(self):
@@ -129,15 +171,14 @@ class ModuleCompositionTests(unittest.TestCase):
         self.cli("init", str(self.root), "--modules", "code")
         config_path = self.root / ".quality/quality.toml"
         config_path.write_text(config_path.read_text() + "\n# local comment\n[custom]\nkeep = true\n")
-        self.cli("upgrade", str(self.root), "--modules", "swarms,visuals")
-        self.assertEqual(self.config()["quality_modules"], ["visuals", "swarms"])
+        self.cli("upgrade", str(self.root), "--modules", "visuals")
+        self.assertEqual(self.config()["quality_modules"], ["visuals"])
         config_text = config_path.read_text()
         self.assertIn("# local comment", config_text)
         self.assertIn("[custom]\nkeep = true", config_text)
         agents = (self.root / "AGENTS.md").read_text()
         self.assertNotIn((ROOT / "assets/modules/code.md").read_text().strip(), agents)
         self.assertIn((ROOT / "assets/modules/visuals.md").read_text().strip(), agents)
-        self.assertIn((ROOT / "assets/modules/swarms.md").read_text().strip(), agents)
 
     def test_legacy_upgrade_defaults_to_all_without_config_rewrite(self):
         self.cli("init", str(self.root), "--modules", "code")

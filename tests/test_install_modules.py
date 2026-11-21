@@ -14,10 +14,11 @@ spec.loader.exec_module(installer)
 
 class InstallerModuleTests(unittest.TestCase):
     def test_each_selection_routes_only_its_optional_policy_and_preserves_local_text(self):
-        for selected in (['code'], ['visuals'], ['swarms'], ['code', 'visuals', 'swarms']):
+        for selected in (['code'], ['visuals'], ['code', 'visuals']):
             with self.subTest(selected=selected):
                 block = installer.delegation_block(ROOT, selected)
-                self.assertEqual('Whole-project risk alone' in block, 'swarms' in selected)
+                self.assertIn('Secret-access boundary:', block)
+                self.assertNotIn('one shared budget across the entire tree', block)
                 self.assertEqual('Quality Visuals:' in block, 'visuals' in selected)
                 self.assertIn('Installed defaults: ' + ', '.join(selected), block)
                 with tempfile.TemporaryDirectory() as temp:
@@ -29,7 +30,7 @@ class InstallerModuleTests(unittest.TestCase):
                     self.assertIn('Keep this custom rule.', content)
                     self.assertEqual(content.count(installer.GLOBAL_START), 1)
                     self.assertEqual(content.count(installer.DELEGATION_START), 1)
-                    if selected != ['code', 'visuals', 'swarms']:
+                    if selected != ['code', 'visuals']:
                         self.assertIn('init . --modules ' + ','.join(selected), content)
 
     def test_invalid_installer_selection_is_clean_and_does_not_write(self):

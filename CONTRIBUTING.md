@@ -12,4 +12,6 @@ For a contribution:
 
 Changes to installation, bootstrap preservation, risk routing, agent instructions, or CI require independent review under this project’s risk gate. Do not include credentials, local agent settings, generated audit packets with private paths, or customer data.
 
+Check the [public edition policy](docs/PUBLIC_EDITION.md) before submitting a skill, instruction file, research artifact, or third-party material.
+
 Contributors retain copyright to their contributions and submit them under the repository’s MIT license. Maintainers decide acceptance; there is no promised response time.

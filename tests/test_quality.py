@@ -256,15 +256,10 @@ class QualityIntegrationTests(unittest.TestCase):
         self.assertNotIn('## Efficient delegation and model selection', text)
         self.assertNotIn('## Quality at delegation boundaries', text)
         self.assertIn('required independent verification', text)
-        self.assertIn('inherit supported defaults', text)
-        self.assertIn('smallest useful team', text)
-        self.assertIn('one persistent design owner', text)
-        self.assertIn('ready independent code-heavy outcomes', text)
-        self.assertIn('one shared budget across the entire tree', text)
 
-    def test_installer_refreshes_swarm_defaults_and_preserves_user_context(self):
+    def test_installer_replaces_old_swarm_defaults_and_preserves_user_context(self):
         home = Path(self.temp.name) / 'swarm-home'
-        stale = (installer.DELEGATION_START + '\nOld delegation policy.\n' + installer.DELEGATION_END)
+        stale = (installer.DELEGATION_START + '\nOld Swarms policy.\n' + installer.DELEGATION_END)
         for relative in ('.codex/AGENTS.md', '.claude/CLAUDE.md'):
             path = home / relative
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -278,11 +273,8 @@ class QualityIntegrationTests(unittest.TestCase):
             text = path.read_text()
             self.assertIn('Keep before.', text)
             self.assertIn('Keep after.', text)
-            self.assertNotIn('Old delegation policy.', text)
+            self.assertNotIn('Old Swarms policy.', text)
             self.assertIn(installer.delegation_block(ROOT).strip(), text)
-            self.assertIn('one shared budget across the entire tree', text)
-            self.assertIn('smallest sufficient task brief', text)
-            self.assertIn('Distinguish supplied context from model context capacity', text)
             self.assertEqual(text.count(installer.DELEGATION_START), 1)
             snapshots[path] = path.read_bytes()
         second = subprocess.run(command, text=True, capture_output=True)
@@ -325,7 +317,7 @@ class QualityIntegrationTests(unittest.TestCase):
                     self.assertEqual(before, {path: path.read_bytes() for path in paths})
                     self.assertFalse((home / '.codex/skills').exists())
 
-    def test_delegation_policy_delivered_by_init_and_adopt(self):
+    def test_public_policy_delivered_by_init_and_adopt(self):
         template = (ROOT / 'assets/project/AGENTS.md').read_text()
         for command in ('init', 'adopt'):
             with self.subTest(command=command):
@@ -335,22 +327,19 @@ class QualityIntegrationTests(unittest.TestCase):
                 self.cli(command, str(project))
                 delivered = (project / 'AGENTS.md').read_text()
                 self.assertIn(template.strip(), delivered)
-                self.assertIn('## Visual and code-heavy workload ownership', delivered)
-                self.assertIn('one persistent design owner', delivered)
-                self.assertIn('permissions, state transitions and persistence', delivered)
-                self.assertIn('## Cost-aware implementation ownership', delivered)
-                self.assertIn('Whole-project risk', installer.delegation_block(ROOT))
-                self.assertIn('Lower effort on the same model is not cheaper-model delegation.', delivered)
+                self.assertIn('### Secret-access boundary', delivered)
+                self.assertIn('## Quality Visuals by AethDesign', delivered)
+                self.assertNotIn('## Quality Swarms by AethDesign', delivered)
                 self.assertIn('Preserve local instruction.', delivered)
 
     def test_current_version_refreshes_scoped_policy_without_configuration_loss(self):
         self.init()
         agents = self.project / 'AGENTS.md'
         current = agents.read_text()
-        start = current.index('## Efficient delegation and model selection')
+        start = current.index('## Quality Visuals by AethDesign')
         end = current.index('<!-- quality-code:end -->', start)
         agents.write_text('# Project-specific note\nKeep this note.\n' + current[:start] +
-                          '## Efficient delegation and model selection\nStale policy.\n\n' + current[end:])
+                          '## Quality Visuals by AethDesign\nStale policy.\n\n' + current[end:])
         config = (self.project / '.quality/quality.toml').read_bytes()
         before = agents.read_bytes()
         self.cli('upgrade', '--dry-run', str(self.project))
@@ -367,7 +356,7 @@ class QualityIntegrationTests(unittest.TestCase):
         self.init()
         agents = self.project / 'AGENTS.md'
         old = (ROOT / 'assets/project/AGENTS.md').read_text()
-        start = old.index('## Efficient delegation and model selection')
+        start = old.index('## Quality Visuals by AethDesign')
         end = old.index('<!-- quality-code:end -->', start)
         old = old[:start] + old[end:]
         agents.write_text('Before managed block.\n\n' + old + '\nAfter managed block.\n')

@@ -21,7 +21,7 @@ CHECK_SPEC.loader.exec_module(repository_checks)
 
 
 class FakeEngine:
-    MODULE_NAMES = ("code", "visuals", "swarms")
+    MODULE_NAMES = ("code", "visuals")
 
     def __init__(self, root: Path):
         self.root = root
@@ -62,9 +62,9 @@ class StandardPackTests(unittest.TestCase):
         paths = builder.build(self.output)
         self.assertEqual([path.name for path in paths], [
             "quality-code-by-aethdesign.zip", "quality-visuals-by-aethdesign.zip",
-            "quality-swarms-by-aethdesign.zip", "quality-standards-by-aethdesign.zip",
+            "quality-standards-by-aethdesign.zip",
         ])
-        for path, expected in zip(paths, ("code", "visuals", "swarms", "code visuals swarms")):
+        for path, expected in zip(paths, ("code", "visuals", "code visuals")):
             with zipfile.ZipFile(path) as archive:
                 self.assertEqual(set(archive.namelist()), set(builder.ENTRY_NAMES))
                 agents = archive.read("AGENTS.md").decode()
@@ -78,21 +78,20 @@ class StandardPackTests(unittest.TestCase):
                 self.assertEqual(manifest["AGENTSsha256"], hashlib.sha256(archive.read("AGENTS.md")).hexdigest())
 
     def test_custom_pack_uses_engine_union_and_is_byte_deterministic(self):
-        path, = builder.build(self.output, "swarms,code,swarms")
+        path, = builder.build(self.output, "code,code")
         with zipfile.ZipFile(path) as archive:
-            self.assertEqual(json.loads(archive.read("manifest.json"))["modules"], ["code", "swarms"])
+            self.assertEqual(json.loads(archive.read("manifest.json"))["modules"], ["code"])
             agents = archive.read("AGENTS.md").decode()
             self.assertEqual(agents.count("FOUNDATION ONCE"), 1)
             self.assertNotIn("MODULE:visuals", agents)
         first = path.read_bytes()
-        builder.build(self.output, "swarms,code,swarms")
+        builder.build(self.output, "code,code")
         self.assertEqual(path.read_bytes(), first)
 
     def test_readme_branding_matches_the_selected_module(self):
         expected = {
             "code": "# Quality Code by AethDesign",
             "visuals": "# Quality Visuals by AethDesign",
-            "swarms": "# Quality Swarms by AethDesign",
         }
         for module, heading in expected.items():
             readme = builder._readme([module])
@@ -100,7 +99,7 @@ class StandardPackTests(unittest.TestCase):
             self.assertIn("instruction-only download", readme)
             self.assertIn("does not include the executable toolkit", readme)
             self.assertIn("scripts/quality_code.py upgrade", readme)
-        self.assertIn("# Quality Standards by AethDesign", builder._readme(["code", "visuals", "swarms"]))
+        self.assertIn("# Quality Code + Visuals by AethDesign", builder._readme(["code", "visuals"]))
 
     def test_invalid_selection_fails_before_creating_output(self):
         with self.assertRaises(ValueError):
@@ -132,7 +131,7 @@ class StandardPackTests(unittest.TestCase):
 
 
 class CanonicalEnginePackTests(unittest.TestCase):
-    def test_real_engine_builds_four_archives_with_exact_composition(self):
+    def test_real_engine_builds_three_archives_with_exact_composition(self):
         engine = builder.load_engine()
         root = engine.find_master_root()
         with tempfile.TemporaryDirectory(prefix="canonical-packs-") as directory:
@@ -140,9 +139,9 @@ class CanonicalEnginePackTests(unittest.TestCase):
             paths = builder.build(output)
             self.assertEqual([path.name for path in paths], [
                 "quality-code-by-aethdesign.zip", "quality-visuals-by-aethdesign.zip",
-                "quality-swarms-by-aethdesign.zip", "quality-standards-by-aethdesign.zip",
+                "quality-standards-by-aethdesign.zip",
             ])
-            selections = (["code"], ["visuals"], ["swarms"], list(engine.MODULE_NAMES))
+            selections = (["code"], ["visuals"], list(engine.MODULE_NAMES))
             first_build = [path.read_bytes() for path in paths]
             for path, modules in zip(paths, selections):
                 with zipfile.ZipFile(path) as archive:
@@ -154,7 +153,6 @@ class CanonicalEnginePackTests(unittest.TestCase):
                         heading = {
                             "code": "## Quality Code by AethDesign",
                             "visuals": "## Quality Visuals by AethDesign",
-                            "swarms": "## Quality Swarms by AethDesign",
                         }[module]
                         self.assertEqual(heading in agents, module in modules)
                     manifest = json.loads(archive.read("manifest.json"))

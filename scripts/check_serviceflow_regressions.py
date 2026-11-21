@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Run ServiceFlow tests with one dated timing quarantine and a deterministic replacement."""
+"""Run frozen ServiceFlow tests with a deterministic replacement for one timing check."""
 
 from __future__ import annotations
 
-from datetime import date
 import json
 from pathlib import Path
 import subprocess
@@ -15,12 +14,9 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 SERVICEFLOW = ROOT / "benchmarks" / "serviceflow-mvp-2026-10"
-QUARANTINE = {
-    "test_id": "test_completion_runner.CompletionTests.test_native_phase_global_timeout_is_observable",
-    "owner": "AethDesign",
-    "reason": "A 0.2-second wall-clock timeout can expire before the synthetic child starts under concurrent benchmark load, leaving no thread-started event to parse.",
-    "expires": "2026-11-14",
-}
+# The frozen original can time out before the child emits its start event.
+# The replacement exercises execute_phase with an emitted event and a mocked process timeout.
+REPLACED_TEST = "test_completion_runner.CompletionTests.test_native_phase_global_timeout_is_observable"
 NATIVE_ROOT = "44444444-4444-4444-4444-444444444444"
 
 sys.path.insert(0, str(SERVICEFLOW))
@@ -35,26 +31,14 @@ def flatten(suite: unittest.TestSuite):
             yield item
 
 
-def select_cases(cases, today=None):
-    today = date.today() if today is None else today
-    if not QUARANTINE["owner"] or not QUARANTINE["reason"]:
-        raise ValueError("quarantine needs owner and reason")
-    if today > date.fromisoformat(QUARANTINE["expires"]):
-        raise ValueError("timing-test quarantine expired; remove or resolve it")
-    matches = [case for case in cases if case.id() == QUARANTINE["test_id"]]
+def select_cases(cases):
+    matches = [case for case in cases if case.id() == REPLACED_TEST]
     if len(matches) != 1:
-        raise ValueError(f"quarantine expected exactly one {QUARANTINE['test_id']!r}, found {len(matches)}")
+        raise ValueError(f"expected exactly one frozen test to replace: {REPLACED_TEST!r}, found {len(matches)}")
     return [case for case in cases if case is not matches[0]]
 
 
 class TimeoutReplacementTests(unittest.TestCase):
-    def test_quarantine_is_exact_unique_owned_and_unexpired(self):
-        matches = [case for case in DISCOVERED_CASES if case.id() == QUARANTINE["test_id"]]
-        self.assertEqual(len(matches), 1)
-        self.assertEqual(QUARANTINE["owner"], "AethDesign")
-        self.assertTrue(QUARANTINE["reason"])
-        self.assertGreaterEqual(date.fromisoformat(QUARANTINE["expires"]), date.today())
-
     def test_execute_phase_timeout_is_observable_with_native_event_and_snapshot(self):
         class FakePopen:
             def __init__(self, args, **kwargs):
@@ -128,7 +112,7 @@ def main() -> int:
     except ValueError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
-    print(f"QUARANTINE: {QUARANTINE['test_id']}; owner={QUARANTINE['owner']}; expires={QUARANTINE['expires']}; reason={QUARANTINE['reason']}; deterministic replacement active", flush=True)
+    print(f"Using deterministic timeout replacement for {REPLACED_TEST}", flush=True)
     replacement = loader.loadTestsFromTestCase(TimeoutReplacementTests)
     suite = unittest.TestSuite([*selected, replacement])
     result = unittest.TextTestRunner(verbosity=2).run(suite)

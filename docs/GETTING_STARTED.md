@@ -1,10 +1,10 @@
 # Getting started
 
-Choose [modules or instruction-only downloads](MODULES.md): Quality Code, Quality Visuals and Quality Swarms by AethDesign. The toolkit defaults to all three; use `--modules code,visuals` on init/adopt or explicit selection changes on upgrade. Without that flag, upgrades preserve the project selection.
+Start with Quality Code and Quality Visuals. Pass `--modules code,visuals` when creating or adopting a project. See [module options and instruction-only downloads](MODULES.md). Upgrades preserve the existing selection unless you explicitly change it.
 
 ## Try the toolkit without changing your agent configuration
 
-From this repository, run `python3 scripts/quality_code.py init /path/to/new-project` or `python3 scripts/quality_code.py adopt /path/to/existing-project`. Adoption preserves existing documentation sections; tailor them to the product before behavioral work.
+From this repository, run `python3 scripts/quality_code.py init /path/to/new-project --modules code,visuals` or `python3 scripts/quality_code.py adopt /path/to/existing-project --modules code,visuals`. Adoption preserves existing documentation sections; tailor them to the product before behavioral work.
 
 Use `./quality validate` for structure, `./quality context <paths...>` for routing, and `./quality verify <profile>` to run the configured commands. Verification profiles are `fast`, `changed`, `full`, and `release`. Detected commands are conservative starting points, not a complete test strategy.
 
@@ -13,7 +13,7 @@ Use `./quality validate` for structure, `./quality context <paths...>` for routi
 Review `scripts/install.py` first. Then, from the repository:
 
 ```sh
-python3 scripts/install.py
+python3 scripts/install.py --modules code,visuals
 ```
 
 The installer:
@@ -28,10 +28,10 @@ Keep the checkout at a stable location. Moving or deleting it breaks the launche
 You can inspect installation in an isolated directory first:
 
 ```sh
-python3 scripts/install.py --home /tmp/quality-code-demo-home
+python3 scripts/install.py --modules code,visuals --home /tmp/quality-code-demo-home
 ```
 
-The generated global blocks instruct agents to run `quality-code init .` for new projects and `quality-code adopt .` for projects missing `.quality/quality.toml`. With the default all-module selection they also deliver visual review, delegation, shared swarm budget and scoped-context guidance, and require checking the installed template before implementation and upgrading stale managed project instructions. Reinstall refreshes both blocks while preserving surrounding user instructions; malformed global markers are rejected before either global instruction file is written.
+The generated global blocks instruct agents to run `quality-code init .` for new projects and `quality-code adopt .` for projects missing `.quality/quality.toml`. The selected modules set the defaults for new projects. The globals also require checking the installed template before implementation and upgrading stale managed project instructions. Reinstall refreshes both blocks while preserving surrounding user instructions; malformed global markers are rejected before either global instruction file is written.
 
 ## Invoke the audit skill
 
@@ -50,13 +50,7 @@ python3 /path/to/quality-code/scripts/quality_code.py upgrade --dry-run /path/to
 python3 /path/to/quality-code/scripts/quality_code.py upgrade /path/to/project
 ```
 
-The dry run preflights version migration and reports intended actions. Supported TOML assignment formatting, including inline comments, is retained; unsupported formatting is rejected before managed files are written. Upgrade refreshes managed instructions, the local engine, wrapper, schema, and accompanying license; it retains configured commands and custom map/testing sections. Review the diff afterward.
-
-## Adopt standard v3 delegation guidance
-
-Upgrade from this checkout to refresh the managed `AGENTS.md` block, project-local engine, and standard version. Your configured verification commands and custom documentation remain in place. The Python CLI distributes the instructions; it does not discover models, choose effort, or spawn helpers itself. The coding agent uses its own runtime's native capabilities when following the policy.
-
-Read [the delegation policy](DELEGATION.md). No provider account, API key, or model-routing dependency is added by this update. Existing global installations need an updated toolkit checkout or refreshed skill distribution before they can distribute v3 to projects.
+The dry run preflights version migration and reports intended actions. Supported TOML assignment formatting, including inline comments, is retained; unsupported formatting is rejected before managed files are written. For an existing Swarms-enabled project, the public CLI requires an explicit module selection before replacing the managed policy. Review the [migration options](MODULES.md) first. Upgrade refreshes managed instructions, the local engine, wrapper, schema, and accompanying license; it retains configured commands and custom map/testing sections. Review the diff afterward.
 
 ## Custom routing
 

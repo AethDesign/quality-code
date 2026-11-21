@@ -17,7 +17,13 @@ from typing import Any
 
 
 STANDARD_VERSION = 3
-MODULE_NAMES = ("code", "visuals", "swarms")
+MODULE_NAMES = ("code", "visuals")
+RETIRED_MODULE = "swarms"
+RETIRED_MODULE_HEADING = "## Quality Swarms by AethDesign"
+RETIRED_MODULE_MESSAGE = (
+    "Quality Swarms is maintained separately by AethDesign. To switch an existing "
+    "project to the public edition, run upgrade with an explicit --modules code,visuals selection."
+)
 ALL_MODULES = list(MODULE_NAMES)
 RISK_ORDER = {"low": 0, "normal": 1, "high": 2, "critical": 3}
 REQUIRED_PROJECT_FILES = (
@@ -94,7 +100,9 @@ def parse_modules(value: str) -> list[str]:
         return list(ALL_MODULES)
     values = value.split(",")
     if not value or any(not item for item in values) or "all" in values:
-        raise QualityError("--modules must be 'all' or a comma-separated list of code, visuals, swarms")
+        raise QualityError("--modules must be 'all' or a comma-separated list of code, visuals")
+    if RETIRED_MODULE in values:
+        raise QualityError(RETIRED_MODULE_MESSAGE)
     unknown = [item for item in values if item not in MODULE_NAMES]
     if unknown:
         raise QualityError(f"unknown quality module(s): {', '.join(unknown)}")
@@ -110,6 +118,8 @@ def configured_modules(config: dict[str, Any]) -> list[str]:
         raise QualityError("quality_modules must select at least one module")
     if len(raw) != len(set(raw)):
         raise QualityError("quality_modules must not contain duplicate selections")
+    if RETIRED_MODULE in raw:
+        raise QualityError(RETIRED_MODULE_MESSAGE)
     unknown = [item for item in raw if item not in MODULE_NAMES]
     if unknown:
         raise QualityError(f"quality_modules contains unknown module(s): {', '.join(unknown)}")
@@ -117,7 +127,7 @@ def configured_modules(config: dict[str, Any]) -> list[str]:
 
 
 def project_modules(config: dict[str, Any]) -> list[str]:
-    """Legacy configurations without a selection retain the historical full bundle."""
+    """Configurations without a selection use both public modules."""
     return configured_modules(config) if "quality_modules" in config else list(ALL_MODULES)
 
 
@@ -133,7 +143,6 @@ def compose_instructions(master: Path, modules: list[str]) -> str:
         "foundation": "## Shared quality foundation",
         "code": "## Quality Code by AethDesign",
         "visuals": "## Quality Visuals by AethDesign",
-        "swarms": "## Quality Swarms by AethDesign",
     }
     names = ["foundation", *(name for name in MODULE_NAMES if name in selected)]
     fragments: list[str] = []
@@ -755,6 +764,21 @@ def preflight_wrapper(root: Path, wrapper: str) -> None:
         raise QualityError(f"{path} already exists and is not managed by quality-code; rename it before adoption")
 
 
+def require_explicit_swarms_migration(root: Path, modules_arg: str | None, command: str) -> None:
+    if modules_arg not in (None, "all"):
+        return
+    instructions_path = root / "AGENTS.md"
+    if not instructions_path.is_file():
+        return
+    instructions = instructions_path.read_text(encoding="utf-8", errors="replace")
+    managed = instructions.partition(MANAGED_START)[2].partition(MANAGED_END)[0]
+    if any(line.strip() == RETIRED_MODULE_HEADING for line in managed.splitlines()):
+        raise QualityError(
+            f"Managed Quality Swarms instructions are present. To switch to the public edition, "
+            f"run {command} with an explicit --modules code,visuals selection."
+        )
+
+
 def bootstrap(root_arg: str, mode: str, modules_arg: str | None = None) -> None:
     selected_modules = parse_modules(modules_arg) if modules_arg is not None else list(ALL_MODULES)
     root = Path(root_arg).expanduser().resolve()
@@ -772,6 +796,7 @@ def bootstrap(root_arg: str, mode: str, modules_arg: str | None = None) -> None:
         print(f"PASS: {root} was already adopted")
         return
 
+    require_explicit_swarms_migration(root, modules_arg, mode)
     rendered = render_project(master, root, selected_modules)
     rendered[".quality/quality.toml"] = set_quality_modules(rendered[".quality/quality.toml"], selected_modules)
     preflight_wrapper(root, rendered["quality"])
@@ -881,10 +906,18 @@ def update_quality_modules(text: str, modules_arg: str | None) -> tuple[str, lis
         config = tomllib.loads(text)
     except tomllib.TOMLDecodeError as exc:
         raise QualityError(f"cannot parse quality.toml before module update: {exc}") from exc
-    existing = project_modules(config)
-    selected = parse_modules(modules_arg) if modules_arg is not None else existing
-    # Legacy projects without a stored choice continue to mean the historical full
-    # bundle. Preserve their config exactly unless the caller makes a new choice.
+    if modules_arg is None:
+        selected = project_modules(config)
+    else:
+        selected = parse_modules(modules_arg)
+        old = config.get("quality_modules")
+        if modules_arg != "all" and isinstance(old, list) and old.count(RETIRED_MODULE) == 1:
+            remaining = [name for name in old if name != RETIRED_MODULE]
+            if remaining:
+                configured_modules({"quality_modules": remaining})
+        else:
+            project_modules(config)
+    # Preserve an implicit public selection unless the caller makes a new choice.
     if modules_arg is None and "quality_modules" not in config:
         return text, selected
     return set_quality_modules(text, selected), selected
@@ -924,7 +957,9 @@ def upgrade(root_arg: str, dry_run: bool, modules_arg: str | None = None) -> Non
     root = find_project_root(Path(root_arg).expanduser())
     config_path = root / ".quality" / "quality.toml"
     # Preflight migration before dry-run output or any managed-file writes.
-    config_text, selected_modules = update_quality_modules(config_path.read_text(encoding="utf-8"), modules_arg)
+    config_text = config_path.read_text(encoding="utf-8")
+    config_text, selected_modules = update_quality_modules(config_text, modules_arg)
+    require_explicit_swarms_migration(root, modules_arg, "upgrade")
     config_text = ensure_audit_threshold(update_standard_version(config_text))
     rendered = render_project(master, root, selected_modules)
     current_config = tomllib.loads(config_path.read_text(encoding="utf-8"))
@@ -1004,10 +1039,10 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
     initialize = subparsers.add_parser("init", help="initialize a new project and its Git boundary")
     initialize.add_argument("path", nargs="?", default=".")
-    initialize.add_argument("--modules", help="instruction modules: all or comma-separated code,visuals,swarms")
+    initialize.add_argument("--modules", help="instruction modules: all or comma-separated code,visuals")
     adopt = subparsers.add_parser("adopt", help="adopt an existing project without replacing its content")
     adopt.add_argument("path", nargs="?", default=".")
-    adopt.add_argument("--modules", help="instruction modules: all or comma-separated code,visuals,swarms")
+    adopt.add_argument("--modules", help="instruction modules: all or comma-separated code,visuals")
     upgrade_parser = subparsers.add_parser("upgrade", help="upgrade managed standard files")
     upgrade_parser.add_argument("path", nargs="?", default=".")
     upgrade_parser.add_argument("--dry-run", action="store_true")

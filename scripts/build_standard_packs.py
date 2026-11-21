@@ -19,7 +19,6 @@ ENGINE_PATH = Path(__file__).resolve().with_name("quality_code.py")
 PACK_NAMES = {
     "code": "quality-code-by-aethdesign.zip",
     "visuals": "quality-visuals-by-aethdesign.zip",
-    "swarms": "quality-swarms-by-aethdesign.zip",
     "all": "quality-standards-by-aethdesign.zip",
 }
 PACK_MARKER = "quality-code-standard-pack"
@@ -27,7 +26,6 @@ ENTRY_NAMES = ("AGENTS.md", "LICENSE", "README.md", "manifest.json")
 MODULE_BRANDS = {
     "code": "Quality Code by AethDesign",
     "visuals": "Quality Visuals by AethDesign",
-    "swarms": "Quality Swarms by AethDesign",
 }
 
 
@@ -50,13 +48,7 @@ def _digest(data: bytes) -> str:
 
 def _readme(modules: list[str]) -> str:
     selection = ",".join(modules)
-    title = (
-        "Quality Standards by AethDesign"
-        if modules == ["code", "visuals", "swarms"]
-        else MODULE_BRANDS[modules[0]]
-        if len(modules) == 1
-        else "Quality " + " and ".join(module.title() for module in modules) + " by AethDesign"
-    )
+    title = MODULE_BRANDS[modules[0]] if len(modules) == 1 else "Quality Code + Visuals by AethDesign"
     module_names = ", ".join(module.title() for module in modules)
     return (
         f"# {title}\n\n"
@@ -64,11 +56,11 @@ def _readme(modules: list[str]) -> str:
         f"{'s' if len(modules) != 1 else ''}, with the shared quality foundation included once.\n\n"
         "This is an instruction-only download. It does not include the executable toolkit, "
         "project templates, or bootstrap command.\n\n"
-        "Source and toolkit: https://github.com/aethirex-ai/quality-code . "
-        "Setup: https://github.com/aethirex-ai/quality-code/blob/main/docs/GETTING_STARTED.md . "
+        "Source and toolkit: https://github.com/AethDesign/quality-code . "
+        "Setup: https://github.com/AethDesign/quality-code/blob/main/docs/GETTING_STARTED.md . "
         "The Code module expects MAP.md, TESTING.md and the local quality CLI; "
         "initialize/adopt the project with the toolkit and the same module selection before implementation. "
-        "Visuals and Swarms can use existing project tools and requirements.\n\n"
+        "Visuals can use existing project tools and requirements.\n\n"
         "Do not stack multiple downloaded AGENTS.md packs. Choose one combined selection. "
         "For a project that needs the executable toolkit, use the root repository CLI to "
         "initialize or adopt it, or to change an existing selection. For example: "

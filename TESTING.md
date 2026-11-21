@@ -2,7 +2,7 @@
 
 ## Test objectives
 
-Verify new and upgraded projects receive provider-neutral delegation instructions without losing custom context. Migration from standard v2 must preserve configured verification commands and update the local engine and version together. Installer tests also cover fresh and stale global swarm/context policy delivery, surrounding user instruction preservation, repeated installation, and malformed-marker rejection before global writes. Instruction delivery is tested; actual model choices, compliance, and efficiency require evidence from the host runtime.
+Verify projects receive the selected public instructions while preserving existing custom context and verification commands. Test explicit migration from legacy Swarms selections, installer refresh, malformed markers, idempotence and ZIP composition.
 
 Prove the CLI can bootstrap a usable project, preserve existing content during adoption, refuse wrapper collisions, route actual configured paths, produce scoped audit packets, and surface verification failures. Confirm installation in an isolated home directory and restrict skill distribution to intended files.
 
@@ -78,19 +78,19 @@ The second portal instrument includes matched actual-studio references, exact-se
 
 ## Cost-aware routing policy delivery
 
-Init/adopt/upgrade preserve project-specific guidance while delivering bounded implementation candidate comparison, separate product-risk and task-difficulty reasoning, and requested/observed model reporting. Installer fallback carries the bundle-decomposition rule without duplicating the full policy. Delivery tests do not establish model compliance or savings. Future trial design and the recorded same-model decision are explained in `docs/DELEGATION_ROUTING.md`; historical benchmark artifacts remain immutable.
+Historical Swarms delivery used bounded implementation candidate comparison and recorded requested and observed settings. The recorded same-model decision is explained in `docs/DELEGATION_ROUTING.md`; historical benchmark artifacts remain immutable.
 
 ## Modular standards and visual gate delivery
 
 Module tests cover init/adopt/upgrade selection, configuration preservation, malformed input and visual packet declarations without code-risk inflation. Installer tests verify selected global defaults, no optional-policy leakage, preserved custom guidance and invalid selection refusal. Deterministic instruction ZIP tests check manifests, one foundation, selected-only content, collision safety and reproducibility. Repository checks reject canonical-template and published-archive drift. Inspect the public module/download presentation at desktop and mobile sizes. The policy requires fresh independent visual review for new/substantial frontend scope, blockers fixed and re-reviewed; delivery tests do not prove agent compliance or certify legal/accessibility completeness. Historical benchmark artifacts and scores remain unchanged.
 
-## Scoped timing-test quarantine
+## Deterministic ServiceFlow timeout verification
 
 On 2026-10-14, a concurrent full verification failed `test_completion_runner.CompletionTests.test_native_phase_global_timeout_is_observable`: its 0.2-second deadline could terminate the synthetic Python process before it emitted `thread.started`, then parsing failed with `Expected exactly one explicit native CLI root`. Other full runs passed; those passes do not erase the observed instability.
 
-Owner: AethDesign toolkit maintainers. Expiry: 2026-11-14. `scripts/check_serviceflow_regressions.py` quarantines only this exact historical test, validates that exactly one matching test exists, reports the exclusion and fails after expiry. Full/release profiles run that wrapper in place of direct ServiceFlow discovery. Every other ServiceFlow test remains active. Frozen benchmark source, results and provenance are unchanged.
+The temporary quarantine expired on 2026-11-14. Full and release verification now use a deterministic substitution for that exact frozen test. The runner requires one match, reports the substitution, and runs all other ServiceFlow checks.
 
-Replacement coverage uses the actual `execute_phase`, event parser, fixture session data and persisted metadata with a controlled process emitting the explicit root before raising `TimeoutExpired`. It verifies observable `timed_out`, absent completion usage and cleanup invocation without relying on scheduler startup speed. Existing real-process deadline/cleanup tests remain in the suite. This controlled test does not prove real host scheduling latency. The follow-up is to stabilize the historical startup assumption in a separately versioned maintenance projection, retain the failure record and remove the quarantine before expiry.
+Replacement coverage uses the actual `execute_phase`, event parser, fixture session data and persisted metadata with a controlled process emitting the explicit root before raising `TimeoutExpired`. It verifies observable `timed_out`, absent completion usage and cleanup invocation without relying on scheduler startup speed. Existing real-process deadline/cleanup tests remain in the suite. This controlled test does not prove real host scheduling latency.
 
 ## ServiceFlow visual baseline publication
 

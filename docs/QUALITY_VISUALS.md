@@ -4,6 +4,8 @@ A starting frontend and landing-page baseline, informed by annotated ServiceFlow
 
 The authoritative [visual module](../assets/modules/visuals.md) supplies the rules. The [independent visual audit protocol](../references/VISUAL_AUDIT.md) defines evidence, findings and correction. [Download the instruction pack](downloads/quality-visuals-by-aethdesign.zip) or [choose a composed selection](MODULES.md).
 
+This is a working baseline. The exploratory visual trials exposed generic compositions and gaps between reviewer verdicts and design quality. They have yet to demonstrate reliable design improvement. See the [visual research and limitations](RESEARCH.md#visual-quality).
+
 | Avoid | Build instead |
 | --- | --- |
 | Slogan eyebrows that restate a heading | Specific headings; labels only when they add needed context |

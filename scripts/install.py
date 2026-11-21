@@ -45,7 +45,7 @@ def merge_managed(existing: str, block: str, start_marker: str, end_marker: str)
 
 def merge_block(existing: str, modules: list[str] | None = None) -> str:
     block = GLOBAL_BLOCK
-    if modules is not None and modules != ["code", "visuals", "swarms"]:
+    if modules is not None and modules != ["code", "visuals"]:
         suffix = " --modules " + ",".join(modules)
         block = block.replace(" init .`", " init ." + suffix + "`").replace(" adopt .`", " adopt ." + suffix + "`")
     return merge_managed(existing, block, GLOBAL_START, GLOBAL_END)
@@ -65,50 +65,17 @@ def delegation_block(master: Path, modules: list[str] | None = None) -> str:
     selected = engine.configured_modules({"quality_modules": modules}) if modules is not None else list(engine.MODULE_NAMES)
     if content.strip() != engine.compose_instructions(master, list(engine.MODULE_NAMES)).strip():
         raise InstallError("canonical full template differs from module sources; regenerate it first")
-    required = ("<!-- quality-code:start -->", "## Quality-code workflow",
-                "## Efficient delegation and model selection",
-                "## Bounded swarms and scoped context",
-                "## Quality at delegation boundaries", "<!-- quality-code:end -->")
-    positions = [content.find(section) for section in required]
-    if any(content.count(section) != 1 for section in required) or positions != sorted(positions):
-        raise InstallError("canonical project policy template is missing required structure")
-    # Global defaults route to the project policy instead of duplicating its full
-    # body in every runtime context. The fallback applies before bootstrap too.
-    text = (DELEGATION_START + "\n## Quality-code delegation defaults\n\n"
-            "For working software projects, before implementation check that the managed AGENTS.md block "
-            "matches the installed composition for the project's quality_modules selection (legacy default: all), not unselected module content. If it is outdated, run "
-            "`~/.local/bin/quality-code upgrade --dry-run .`, then `~/.local/bin/quality-code upgrade .`; "
-            "preserve project-specific instructions and configuration and resolve collisions.\n\n"
-            "The project's managed AGENTS.md owns the complete selected AethDesign standards policy. "
-            "Use it when already supplied by the runtime; do not load a second full copy. "
-            "For missing policy details, read only relevant sections of the installed template at "
-            + str(template) + ". Bootstrap/init/adopt delivers that policy before software implementation.\n\n"
-            "Fallback while project policy is unavailable: preserve risk lanes, safety, permissions, skill requirements "
-            "and required independent verification. Delegate only ready worthwhile independent outcomes; use coherent "
-            "direct owners, useful primary work and the smallest useful team. Discover available models, supported effort, "
-            "tools/context/capacity through native evidence; choose the least costly fit likely to satisfy criteria, "
-            "escalating when uncertainty or failures justify it. Never invent or hardcode model identifiers, rankings, "
-            "prices or settings; inherit supported defaults when discovery is unavailable.\n\n"
-            "Before assigning a large bundle to the default model, identify worthwhile bounded implementation outcomes "
-            "and compare cheaper qualified candidates. Whole-project risk alone does not justify rejecting them. "
-            "Preserve contracts/review/gates, use supported scoped model selection and distinguish requested from observed settings.\n\n"
-            "Use one shared budget across the entire tree including every descendant, context transfer, retries and final "
-            "verification; branch shares do not reset it. Permit hierarchy only for substantial independent work. "
-            "Pass the smallest sufficient task brief in fresh scoped context, including contracts, ownership, constraints, "
-            "budget and evidence; bound retrieval/tool output and return paths, checks and unresolved issues. "
-            "Do not print media base64 or duplicate investigations/checks unnecessarily. "
-            "Distinguish supplied context from model context capacity; use only supported controls. "
-            "Keep visually coupled work with one persistent design owner and a small useful helper team; "
-            "reserve bounded swarms for ready independent code-heavy outcomes, preserving API/state contracts and gates. "
-            "Primary owns integration and observable product/visual/defect validation. A builder/director cannot "
-            "provide its independent audit verdict. If a required independent gate is unavailable, report it blocked. "
-            "Parallelism and cheaper API models do not prove lower subscription usage.\n\n"
-            + DELEGATION_END + "\n")
-    prefix = text[:text.index("Fallback while project policy is unavailable:")]
-    prefix += "Installed defaults: " + ", ".join(selected) + ". Existing project selections are preserved on upgrade.\n\n"
-    fallback = "Fallback while project policy is unavailable: preserve risk lanes, safety, permissions and required independent verification. Do not claim unavailable evidence passed.\n\n"
-    if "swarms" in selected:
-        fallback = text[text.index("Fallback while project policy is unavailable:"):text.index(DELEGATION_END)]
+    # Route to the composed project policy without duplicating it in each session.
+    prefix = (DELEGATION_START + "\n## Quality Code project defaults\n\n"
+              "Before implementation, check that the managed AGENTS.md block matches the selected public modules. "
+              "For a stale block, run `~/.local/bin/quality-code upgrade --dry-run .`, then "
+              "`~/.local/bin/quality-code upgrade .` if the dry run succeeds. "
+              "Preserve project-specific content and resolve any reported collisions or legacy module choices.\n\n"
+              "The project's managed AGENTS.md owns the complete selected AethDesign standards policy. "
+              "Use it when already supplied by the runtime. Read missing details from " + str(template) + ".\n\n"
+              "Installed defaults: " + ", ".join(selected) + ". Upgrades preserve supported project selections.\n\n")
+    fallback = ("Fallback while project policy is unavailable: preserve risk lanes, safety, permissions and "
+                "required independent verification. Do not claim unavailable evidence passed.\n\n")
     fallback += ("Secret-access boundary: never read or interact with .env variants (including examples), secret/credential/private-key files or stores, "
                  "or secret/credentials/sensitive/private/scr-labelled project folders without explicit user authorization for the relevant path/category and operation. "
                  "Exclude indirect searches, scripts, symlinks and helper access too; only minimal avoidance metadata is allowed. "
@@ -181,7 +148,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--home", type=Path, default=Path.home())
     parser.add_argument("--bin-dir", type=Path)
-    parser.add_argument("--modules", default="all", help="all or comma-separated code, visuals, swarms defaults for new projects")
+    parser.add_argument("--modules", default="all", help="all or comma-separated code, visuals defaults for new projects")
     return parser
 
 

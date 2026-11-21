@@ -1,4 +1,4 @@
-quality_modules = ["code", "visuals", "swarms"]
+quality_modules = ["code", "visuals"]
 version = 1
 standard_version = 3
 project = "quality-code"
