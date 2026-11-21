@@ -107,3 +107,9 @@ Existing composition/install/download tests verify delivery of the revised canon
 ## Secret-access boundary delivery
 
 Composition, installer and deterministic-pack tests verify delivery in every module selection without duplicating the shared foundation. Independent scenario review must cover environment examples, credential/key files, case variants and secret-labelled folders, `scr` versus ordinary `src`, symlink/recursive/tool/helper bypasses, generic task instructions versus scoped existing permission, avoiding secret output even when access is authorized, and safe remaining work when protected evidence is unavailable. This is instruction delivery and review, not proof of model compliance or an OS sandbox. Do not use real secrets as fixtures.
+
+## Editorial verification
+
+Stage only the files intended for the change, then run `./quality verify docs`. It accepts a fixed list of existing Markdown and Pages gallery surfaces when their executable markup, styles, attributes and templates are unchanged. It checks changed documents and local link targets using Git metadata, without opening target files. To check commits, run `python3 -B scripts/verify_docs.py --base <base> --head <head>`. Use focused visual checks for visible copy changes. The gate covers the staged or committed diff only.
+
+CI runs that check with a sparse checkout of the checker alone. Unknown bases, mixed diffs, benchmark assets, policy files and gallery behavior changes retain full verification. Only a passing docs check on the complete staged copy scope qualifies for the editorial exception in `AGENTS.md`. Path-based benchmark routing stays high by default. Gallery behavior, data and assets retain the normal high-risk gate. The CI workflow hard-routes changes to its workflow and checker to full verification before invoking the candidate checker. Full verification still requires scoped authorization for the protected fixture operations it performs.

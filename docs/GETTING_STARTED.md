@@ -59,3 +59,5 @@ See [the example route](../examples/risk-route.toml). Add project-specific paths
 ## Platform support
 
 The toolkit requires Python 3.11+ (`tomllib`) and Git. The wrapper targets POSIX shells; CI covers Ubuntu and macOS. Direct Python invocation is possible on other systems, but Windows integration and global agent paths are not validated here.
+
+For editorial changes to this public repository, stage the intended files and run `./quality verify docs`. See the [verification evidence](../TESTING.md#editorial-verification) for eligibility and full-suite routing.

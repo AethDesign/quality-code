@@ -35,6 +35,8 @@ Verification runs configured executables with user permissions. No sandbox. Pres
 
 `./quality validate` checks structure. `./quality verify full` runs offline stdlib unit/integration tests, distribution synchronization and documentation checks, and Git whitespace checks. Fast and changed profiles also run toolkit tests because the engine is small. Full/release use `scripts/check_serviceflow_regressions.py` to substitute a deterministic process-timeout check for one frozen timing test; frozen benchmark files stay unchanged. Release uses the full profile; it performs no remote writes.
 
+For staged editorial changes, `./quality verify docs` uses Git metadata and selected copy only. Hosted CI uses the same eligibility check before any benchmark checkout. Use the scoped editorial exception in `AGENTS.md` only after the docs checker passes. The default path-based benchmark route remains high-risk. Mixed changes and unproven scope run the full matrix.
+
 ## Do not edit casually
 
 Bootstrap, upgrade, installer, configuration defaults, agent policy, and CI affect preservation or public behavior. Independent audit required. Public publication is explicitly authorized by the repository owner for this initial edition.

@@ -7,7 +7,34 @@ on:
 permissions:
   contents: read
 jobs:
+  scope:
+    runs-on: ubuntu-latest
+    outputs:
+      profile: ${{ steps.scope.outputs.profile }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: /scripts/verify_docs.py
+      - id: scope
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ -z "$BASE" ]] || ! git diff --quiet --no-ext-diff --no-textconv --no-renames "$BASE" HEAD -- .github/workflows scripts/verify_docs.py; then
+            profile=full
+          else
+            profile=$(python3 -B scripts/verify_docs.py --ci --base "$BASE" --head HEAD)
+          fi
+          case "$profile" in
+            docs|full) echo "profile=$profile" >> "$GITHUB_OUTPUT" ;;
+            *) echo "Unexpected verification profile" >&2; exit 1 ;;
+          esac
+          echo "Verification profile: $profile"
   verify:
+    needs: scope
+    if: needs.scope.outputs.profile != 'docs'
     strategy:
       fail-fast: false
       matrix:
