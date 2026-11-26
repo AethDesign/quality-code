@@ -33,6 +33,14 @@ For any change affecting code, configuration, dependencies, tests, builds, data,
 8. Builder validation is mandatory in every lane. For a concrete bug, field-test the original or smallest failing case only as needed to understand it, then once to confirm the fix. Add more cases only when requested or justified by risk, an unclear cause, or inconsistent results.
 9. Resolve blocking audit findings and request re-audit when an independent audit was required. Otherwise hand off after the lane's evidence passes, with residual risk stated when material.
 
+### Git ownership and history
+
+Use Git for coding work. Before editing, confirm the intended repository root, base commit, task branch and owned outcome. Initialize Git for a new standalone project. Give each concurrent writer a dedicated worktree or clone and short-lived task branch. Honor project conventions and the secret-access boundary when checking out files. Record shared contract dependencies and their owner before parallel implementation.
+
+Leave unrelated staged, unstaged and untracked work with its owner. In a mixed checkout, transfer only edits you can identify as yours into your task checkout. Coordinate ambiguous or overlapping hunks before proceeding. Never stash, reset, clean or stage another writer’s changes to finish your task.
+
+Stage explicit owned changes, inspect the complete staged path list and permitted patch, run applicable checks and commit coherent outcomes with related tests and a descriptive subject. At handoff give the branch, commit SHA, verification and dependencies, or the reason a commit is blocked. Bind any required independent review to the task’s base and exact candidate commit. Recheck affected contracts on integration. Follow repository authorization for pushing, merging and releases.
+
 ## Quality Visuals by AethDesign
 
 This is a starting baseline for frontends and landing pages, not an exhaustive design system. Judge information, composition and usability, not whether a design was human- or AI-generated. User-approved brand and product requirements govern deliberate exceptions; do not invent an exception to retain filler.
